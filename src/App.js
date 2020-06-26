@@ -1,26 +1,27 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import IngresarProducto from "./UI/Components/IngresarProducto";
 
-function App() {
+
+function Main({ productos }) {
+  const [state, setState] = React.useState(null)
+  const [productosLista, setProductos] = React.useState([])
+  async function registrarProducto(nombreProducto) {
+    const newList = [...productosLista, nombreProducto]
+    try {
+      await productos.registrar(nombreProducto)
+      setProductos(newList)
+    } catch (error) {
+      setState(error)
+    }
+  }
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <section>
+      <IngresarProducto registrarProducto={registrarProducto} />
+      {productosLista.map((nombreProducto, index) => <div key={index}>{nombreProducto}</div>)}
+      {state ? <div>{state.message}</div> : null}
+    </section>
   );
 }
 
-export default App;
+
+export default Main;
