@@ -1,26 +1,54 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import IngresarProducto from "./UI/Components/IngresarProducto";
 
-function App() {
+function useFeedback() {
+  const [error, tomarError] = React.useState(null)
+  return {
+    error(e) {
+      tomarError(e)
+    },
+    removerMensajeDeNombreInvalido() {
+      tomarError(null)
+    },
+    render() {
+      return error ? <div>{error.message}</div> : null
+    }
+  }
+}
+
+function useProductos(registroDeProductos, productos, feedback) {
+  const [lista, setProductos] = React.useState(productos)
+
+  async function registrarProducto(nombreProducto) {
+    try {
+      await registroDeProductos.registrar(nombreProducto)
+      setProductos([...lista, nombreProducto])
+    } catch (e) {
+      feedback.error(e)
+    }
+  }
+
+  return [registrarProducto, lista]
+}
+
+function App(props) {
+  const feedback = useFeedback()
+  const [registrarProducto, productos] = useProductos(props.registroDeProductos, props.productos, feedback)
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <section>
+      <IngresarProducto registrarProducto={registrarProducto} feedback={feedback} />
+      <ListadoDeProductos productos={productos} />
+      {feedback.render()}
+    </section>
   );
 }
+
+function ListadoDeProductos({productos}) {
+  return productos.map(
+    (nombreProducto, index) => <div key={index}>{nombreProducto}</div>
+  )
+}
+
 
 export default App;
